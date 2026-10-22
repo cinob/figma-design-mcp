@@ -1,0 +1,44 @@
+[
+  {
+    "id": "101:205",
+    "name": "Submit Button",
+    "type": "FRAME",
+    "bboxX": 20,
+    "bboxY": 400,
+    "bboxW": 335,
+    "bboxH": 48,
+    "background": "#1677ff",
+    "color": "#ffffff",
+    "fontSize": 16,
+    "fontWeight": 600,
+    "borderRadius": 8,
+    "border": null,
+    "boxShadow": "0px 4px 12px 0px rgba(22, 119, 255, 0.25)",
+    "opacity": 1,
+    "layout": {
+      "mode": "row",
+      "itemSpacing": 8,
+      "padding": {
+        "top": 12,
+        "right": 16,
+        "bottom": 12,
+        "left": 16
+      },
+      "alignItems": "center",
+      "justifyContent": "center"
+    },
+    "unocss": [
+      "flex",
+      "gap-8px",
+      "py-12px",
+      "px-16px",
+      "items-center",
+      "justify-center",
+      "rounded-8px",
+      "bg-[#1677ff]",
+      "text-[#ffffff]",
+      "text-16px",
+      "font-600"
+    ]
+  }
+]

@@ -1,0 +1,2 @@
+allowBuilds:
+  '@jackwener/opencli': set this to true or false

@@ -1,0 +1,29 @@
+node_modules
+.DS_Store
+.figma-mcp
+*.log
+.env
+.env.local
+dist
+
+# Credentials & local tokens
+*.token
+*.local.json
+token.txt
+
+# Local test & asset downloads
+test/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.webp
+
+# OS & editor
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
