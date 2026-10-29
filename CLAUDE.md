@@ -56,7 +56,8 @@ figma-design-mcp/
 │   ├── style.js              # opencli figma style
 │   ├── tree.js               # opencli figma tree
 │   ├── tokens.js             # opencli figma tokens
-│   └── asset.js              # opencli figma asset
+│   ├── asset.js              # opencli figma asset
+│   └── comments.js           # opencli figma comments
 └── site/                     # OpenCLI site memory & verification
     ├── notes.md              # Figma API & authentication notes
     └── verify/               # adapter verification fixtures
@@ -197,6 +198,14 @@ Purpose: download SVG/PNG/JPG renders or image fills from a specific Figma node.
 opencli figma asset <url> --node 1:2 --type svg --out ./assets -f json
 ```
 
+### `figma/comments`
+
+Purpose: extract comments from a Figma design URL, including target node ID, relative pin offset, resolved status, and replies.
+
+```bash
+opencli figma comments <url> --node 1:2 --unresolved-only -f json
+```
+
 ## MCP Tools
 
 MCP server entrypoint: `server.js`. Install in Claude Code with:
@@ -214,6 +223,7 @@ Exposed tools:
 - `figma_get_tree`
 - `figma_extract_tokens`
 - `figma_download_asset`
+- `figma_get_comments`
 - `figma_sync_project`
 - `figma_search_designs`
 - `figma_get_tree_by_name`

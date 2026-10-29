@@ -239,6 +239,13 @@ export async function fetchProjectFiles(projectId, token) {
 }
 
 /**
+ * Fetch comments for a Figma file.
+ */
+export async function fetchFigmaComments(fileKey, token) {
+  return figmaApi(`/files/${fileKey}/comments`, {}, token);
+}
+
+/**
  * Recursively find a node by ID in the Figma tree.
  */
 export function findFigmaNode(node, targetId) {

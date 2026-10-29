@@ -12,6 +12,7 @@
 - **图层结构树提取**：导出完整或指定深度的图层树，支持挂载节点计算样式、标准 CSS 声明与文本内容。
 - **设计 Token 提取**：自动聚合并去重设计稿中的颜色色板、字号阶梯、字重列表、圆角规格以及常用间距。
 - **资源与切图下载**：通过 Figma API 直接导出指定节点的 SVG 矢量文件、PNG/JPG 位图（支持自定义缩放倍数）或提取图片填充原图。
+- **评论与节点需求点提取**：获取设计稿与 Dev Mode 下的图钉评论（包含对应节点 `nodeId`、内部相对坐标 `nodeOffset`、画布全局坐标、评论作者及回复线程，支持筛选未解决项）。
 - **本地项目索引工作流**：支持将设计稿结构同步为前端工程下的 `.figma-mcp/catalog.json`，方便通过名称直接搜索和还原设计稿。
 
 ## OpenCLI 命令一览
@@ -37,6 +38,9 @@ opencli figma tokens <url> -f json
 
 # 7. 下载节点切图或矢量素材 (支持 svg / png / jpg / image)
 opencli figma asset <url> --node "1:2" --type svg --out ./assets -f json
+
+# 8. 获取评论（支持按节点过滤、筛选未解决）
+opencli figma comments <url> --node "1:2" --unresolved-only -f json
 ```
 
 ## 安装与配置
@@ -106,7 +110,8 @@ figma-design-mcp/
 │   ├── style.js              # figma style 命令
 │   ├── tree.js               # figma tree 命令
 │   ├── tokens.js             # figma tokens 命令
-│   └── asset.js              # figma asset 命令
+│   ├── asset.js              # figma asset 命令
+│   └── comments.js           # figma comments 命令
 └── site/                     # 验证 fixtures 与说明文档
     ├── notes.md
     └── verify/

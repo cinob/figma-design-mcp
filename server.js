@@ -528,6 +528,24 @@ server.registerTool('figma_download_asset', {
   return jsonResponse(result);
 });
 
+server.registerTool('figma_get_comments', {
+  title: 'Get Figma comments with node pins and requirements',
+  description: 'Return comments from a Figma design URL or fileKey, including message, user, resolved status, targeted node ID, and pin offset coordinates.',
+  inputSchema: {
+    url: z.string().min(1).describe('Figma design URL or fileKey'),
+    node: z.string().optional().describe('Optional node ID to filter comments for a specific node (e.g. 1:2 or 1-2)'),
+    unresolvedOnly: z.boolean().default(false).describe('Only return unresolved comments'),
+    token: z.string().optional().describe('Optional Figma Personal Access Token'),
+  },
+}, async ({ url, node, unresolvedOnly, token }) => {
+  const args = [url];
+  optionalStringArg(args, '--node', node);
+  if (unresolvedOnly) args.push('--unresolved-only');
+  optionalStringArg(args, '--token', token);
+  const result = await runOpenCli('comments', args);
+  return jsonResponse(result);
+});
+
 server.registerTool('figma_sync_project', {
   title: 'Sync Figma project catalog',
   description: 'List Figma pages/frames/files and write a sanitized .figma-mcp/catalog.json into the real frontend workspace for fast reference.',
