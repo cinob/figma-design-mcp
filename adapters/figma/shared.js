@@ -876,6 +876,35 @@ export function extractTree(rootNode, frameFilter = null, options = {}) {
 }
 
 /**
+ * Collect Dev Mode annotations (designer notes + pinned properties) grouped by node.
+ * `annotations` is only present on nodes that carry a note, so it must be treated as optional.
+ * Annotation objects are passed through verbatim: the published schema lags the wire format.
+ */
+export function extractAnnotations(rootNode) {
+  const rows = [];
+
+  function walk(node, path) {
+    if (!node) return;
+    const here = [...path, String(node.name || '')];
+
+    if (Array.isArray(node.annotations) && node.annotations.length > 0) {
+      rows.push({
+        nodeId: String(node.id || ''),
+        nodeName: String(node.name || ''),
+        nodeType: String(node.type || ''),
+        path: here.filter(Boolean).join(' / '),
+        annotations: node.annotations,
+      });
+    }
+
+    for (const child of node.children || []) walk(child, here);
+  }
+
+  walk(rootNode, []);
+  return rows;
+}
+
+/**
  * Extract reusable design tokens (colors, fontSizes, radii, spacing) from Figma document.
  */
 export function extractTokens(fileData) {

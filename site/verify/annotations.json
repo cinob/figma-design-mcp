@@ -1,0 +1,26 @@
+[
+  {
+    "nodeId": "101:200",
+    "nodeName": "Login Screen",
+    "nodeType": "FRAME",
+    "path": "Document / Page 1 / Login Screen",
+    "annotations": [
+      {
+        "label": "登录页整体使用 8px 栅格，左右安全边距 20px",
+        "properties": [{ "type": "padding" }, { "type": "width" }]
+      }
+    ]
+  },
+  {
+    "nodeId": "101:205",
+    "nodeName": "Submit Button",
+    "nodeType": "FRAME",
+    "path": "Document / Page 1 / Login Screen / Submit Button",
+    "annotations": [
+      {
+        "label": "点击后调用 /auth/login，注意 disabled 态",
+        "properties": [{ "type": "fills" }, { "type": "cornerRadius" }, { "type": "height" }]
+      }
+    ]
+  }
+]

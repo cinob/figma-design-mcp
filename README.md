@@ -41,6 +41,9 @@ opencli figma asset <url> --node "1:2" --type svg --out ./assets -f json
 
 # 8. 获取评论（支持按节点过滤、筛选未解决）
 opencli figma comments <url> --node "1:2" --unresolved-only -f json
+
+# 9. 获取 Dev Mode 标注（按节点分组，含图层路径与锚定属性）
+opencli figma annotations <url> [--node "1:2"] -f json
 ```
 
 ## 安装与配置
@@ -111,7 +114,8 @@ figma-design-mcp/
 │   ├── tree.js               # figma tree 命令
 │   ├── tokens.js             # figma tokens 命令
 │   ├── asset.js              # figma asset 命令
-│   └── comments.js           # figma comments 命令
+│   ├── comments.js           # figma comments 命令
+│   └── annotations.js        # figma annotations 命令
 └── site/                     # 验证 fixtures 与说明文档
     ├── notes.md
     └── verify/
@@ -161,6 +165,7 @@ claude mcp remove figma
 - `figma_sync_project`: 将 Figma 页面索引同步写入前端工作区的 `.figma-mcp/catalog.json`。
 - `figma_search_designs`: 在前端工作区搜索设计稿或画框。
 - `figma_get_tree_by_name`: 根据设计稿或画框名称直接检索并获取对应的图层树。
+- `figma_get_annotations`: 获取 Dev Mode 标注（设计师备注与锚定属性），按节点分组并附带图层路径。
 
 ## Claude Code 推荐前端还原工作流
 

@@ -546,6 +546,22 @@ server.registerTool('figma_get_comments', {
   return jsonResponse(result);
 });
 
+server.registerTool('figma_get_annotations', {
+  title: 'Get Figma Dev Mode annotations',
+  description: 'Return Dev Mode annotations (designer notes and pinned properties) from a Figma design, grouped by node with nodeId, node name/type and layer path. An empty array means the file has no annotations.',
+  inputSchema: {
+    url: z.string().min(1).describe('Figma design URL or fileKey'),
+    node: z.string().optional().describe('Only return annotations under this node ID (e.g. 1:2 or 1-2)'),
+    token: z.string().optional().describe('Optional Figma Personal Access Token'),
+  },
+}, async ({ url, node, token }) => {
+  const args = [url];
+  optionalStringArg(args, '--node', node);
+  optionalStringArg(args, '--token', token);
+  const result = await runOpenCli('annotations', args, { timeoutMs: 180_000 });
+  return jsonResponse(result);
+});
+
 server.registerTool('figma_sync_project', {
   title: 'Sync Figma project catalog',
   description: 'List Figma pages/frames/files and write a sanitized .figma-mcp/catalog.json into the real frontend workspace for fast reference.',

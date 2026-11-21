@@ -57,7 +57,8 @@ figma-design-mcp/
 │   ├── tree.js               # opencli figma tree
 │   ├── tokens.js             # opencli figma tokens
 │   ├── asset.js              # opencli figma asset
-│   └── comments.js           # opencli figma comments
+│   ├── comments.js           # opencli figma comments
+│   └── annotations.js        # opencli figma annotations
 └── site/                     # OpenCLI site memory & verification
     ├── notes.md              # Figma API & authentication notes
     └── verify/               # adapter verification fixtures
@@ -206,6 +207,16 @@ Purpose: extract comments from a Figma design URL, including target node ID, rel
 opencli figma comments <url> --node 1:2 --unresolved-only -f json
 ```
 
+### `figma/annotations`
+
+Purpose: extract Dev Mode annotations (designer notes + pinned property types) grouped by node. Returns `nodeId`, `nodeName`, `nodeType`, layer `path`, and the raw `annotations` array.
+
+```bash
+opencli figma annotations <url> [--node 1:2] -f json
+```
+
+An empty result is a normal answer (the file simply has no annotations or the token lacks Dev Mode access), unlike the other adapters which raise `EmptyResultError`. `annotations` is only present on annotated nodes — Figma caps it at 1 per node — and the field shape is passed through verbatim because Figma's published OpenAPI schema lags the wire format.
+
 ## MCP Tools
 
 MCP server entrypoint: `server.js`. Install in Claude Code with:
@@ -224,6 +235,7 @@ Exposed tools:
 - `figma_extract_tokens`
 - `figma_download_asset`
 - `figma_get_comments`
+- `figma_get_annotations`
 - `figma_sync_project`
 - `figma_search_designs`
 - `figma_get_tree_by_name`
