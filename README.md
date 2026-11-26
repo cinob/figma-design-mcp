@@ -13,7 +13,7 @@
 - **设计 Token 提取**：自动聚合并去重设计稿中的颜色色板、字号阶梯、字重列表、圆角规格以及常用间距。
 - **资源与切图下载**：通过 Figma API 直接导出指定节点的 SVG 矢量文件、PNG/JPG 位图（支持自定义缩放倍数）或提取图片填充原图。
 - **评论与节点需求点提取**：获取设计稿与 Dev Mode 下的图钉评论（包含对应节点 `nodeId`、内部相对坐标 `nodeOffset`、画布全局坐标、评论作者及回复线程，支持筛选未解决项）。
-- **本地项目索引工作流**：支持将设计稿结构同步为前端工程下的 `.figma-mcp/catalog.json`，方便通过名称直接搜索和还原设计稿。
+- **本地项目索引与节点缓存**：在前端工程的 `.figma-mcp/` 中保存设计稿索引，以及节点样式和图层树，减少重复请求。
 
 ## OpenCLI 命令一览
 
@@ -166,6 +166,14 @@ claude mcp remove figma
 - `figma_search_designs`: 在前端工作区搜索设计稿或画框。
 - `figma_get_tree_by_name`: 根据设计稿或画框名称直接检索并获取对应的图层树。
 - `figma_get_annotations`: 获取 Dev Mode 标注（设计师备注与锚定属性），按节点分组并附带图层路径。
+
+### 本地节点缓存
+
+`figma_get_node_style`、`figma_get_tree` 和 `figma_get_tree_by_name` 首次成功读取后，会自动将结果保存至前端项目的 `.figma-mcp/cache/`；相同请求在一小时内优先使用缓存。传入 `refresh: true` 可立即重新读取并更新缓存，删除该目录也可清除缓存。不同节点、查询选项和访问凭证分别缓存；失败结果不会缓存。
+
+前两个工具建议始终传入前端工程根目录的绝对路径 `workspaceDir`；省略时使用 **MCP 服务进程的工作目录**，它不一定是当前编辑器打开的项目。`figma_get_tree_by_name` 必须传入 `workspaceDir`，并先通过 `figma_sync_project` 创建目录索引。
+
+缓存含设计稿文本和样式等可能敏感的数据，请根据项目需求将 `.figma-mcp/` 加入前端工程的 `.gitignore`，不要提交到公开仓库。缓存是本地副本，不会自动感知 Figma 更新或权限撤销；需要最新结果时使用 `refresh: true`。
 
 ## Claude Code 推荐前端还原工作流
 

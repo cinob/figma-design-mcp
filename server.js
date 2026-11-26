@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import * as z from 'zod/v4';
+import { cachedOpenCli } from './cache.js';
 
 const require = createRequire(import.meta.url);
 const toolDir = dirname(fileURLToPath(import.meta.url));
@@ -17,7 +18,7 @@ const SENSITIVE_KEY_RE = /(^|[_-])(access[_-]?token|api[_-]?key|authorization|cl
 
 const server = new McpServer({
   name: 'figma-design-mcp',
-  version: '1.0.0',
+  version: '1.1.1',
 });
 
 function stripAnsi(text) {
@@ -191,6 +192,15 @@ function runOpenCli(command, args, options = {}) {
         reject(error);
       }
     });
+  });
+}
+
+function runCachedOpenCli(command, args, workspaceDir, refresh, options) {
+  const workspace = resolveWorkspaceDir(workspaceDir || process.cwd());
+  return cachedOpenCli({
+    workspace, toolDir, command, args, refresh,
+    run: () => runOpenCli(command, args, options),
+    sanitize: redactData,
   });
 }
 
@@ -460,14 +470,16 @@ server.registerTool('figma_get_node_style', {
     url: z.string().min(1).describe('Figma design URL or fileKey'),
     node: z.string().min(1).describe('Figma node ID, e.g. 1:2 or 1-2'),
     styleType: z.enum(['auto', 'unocss', 'tailwind', 'css']).default('auto').describe('Styling engine: auto (detect from project workspace), unocss, tailwind, or standard css declarations'),
-    workspaceDir: z.string().optional().describe('Optional absolute path to the real frontend project root for auto-detecting framework & styling'),
+    workspaceDir: z.string().optional().describe('Absolute frontend project root for style detection and cache; defaults to the MCP server working directory'),
+    refresh: z.boolean().default(false).describe('Fetch fresh data instead of using the local one-hour cache'),
     token: z.string().optional().describe('Optional Figma Personal Access Token'),
   },
-}, async ({ url, node, styleType, workspaceDir, token }) => {
+}, async ({ url, node, styleType, workspaceDir, refresh, token }) => {
+  const workspace = resolveWorkspaceDir(workspaceDir || process.cwd());
   const args = [url, '--node', node, '--style-type', styleType || 'auto'];
-  optionalStringArg(args, '--workspace', workspaceDir);
+  optionalStringArg(args, '--workspace', workspace);
   optionalStringArg(args, '--token', token);
-  const result = await runOpenCli('style', args);
+  const result = await runCachedOpenCli('style', args, workspace, refresh);
   return jsonResponse(result);
 });
 
@@ -479,17 +491,19 @@ server.registerTool('figma_get_tree', {
     frame: z.string().optional().describe('Optional frame/page ID filter (e.g. 1:2)'),
     withStyle: z.boolean().default(false).describe('Include normalized style data, CSS declarations, and adaptive classes for every node'),
     styleType: z.enum(['auto', 'unocss', 'tailwind', 'css']).default('auto').describe('Styling engine: auto, unocss, tailwind, or standard css declarations'),
-    workspaceDir: z.string().optional().describe('Optional absolute path to the real frontend project root for auto-detecting framework & styling'),
+    workspaceDir: z.string().optional().describe('Absolute frontend project root for style detection and cache; defaults to the MCP server working directory'),
     maxDepth: z.number().int().min(0).default(99).describe('Maximum child depth to include'),
+    refresh: z.boolean().default(false).describe('Fetch fresh data instead of using the local one-hour cache'),
     token: z.string().optional().describe('Optional Figma Personal Access Token'),
   },
-}, async ({ url, frame, withStyle, styleType, workspaceDir, maxDepth, token }) => {
+}, async ({ url, frame, withStyle, styleType, workspaceDir, maxDepth, refresh, token }) => {
+  const workspace = resolveWorkspaceDir(workspaceDir || process.cwd());
   const args = [url, '--max-depth', String(maxDepth ?? 99), '--style-type', styleType || 'auto'];
+  optionalStringArg(args, '--workspace', workspace);
   optionalStringArg(args, '--frame', frame);
-  optionalStringArg(args, '--workspace', workspaceDir);
-  optionalStringArg(args, '--token', token);
   if (withStyle) args.push('--with-style');
-  const result = await runOpenCli('tree', args, { timeoutMs: 180_000 });
+  optionalStringArg(args, '--token', token);
+  const result = await runCachedOpenCli('tree', args, workspace, refresh, { timeoutMs: 180_000 });
   return jsonResponse(result);
 });
 
@@ -665,9 +679,10 @@ server.registerTool('figma_get_tree_by_name', {
     withStyle: z.boolean().default(true).describe('Include normalized style data, CSS declarations, and adaptive classes for every node'),
     styleType: z.enum(['auto', 'unocss', 'tailwind', 'css']).default('auto').describe('Styling engine: auto (detect from workspace), unocss, tailwind, or standard css declarations'),
     maxDepth: z.number().int().min(0).default(99).describe('Maximum child depth to include'),
+    refresh: z.boolean().default(false).describe('Fetch fresh data instead of using the local one-hour cache'),
     token: z.string().optional().describe('Optional Figma Personal Access Token'),
   },
-}, async ({ name, workspaceDir, withStyle, styleType, maxDepth, token }) => {
+}, async ({ name, workspaceDir, withStyle, styleType, maxDepth, refresh, token }) => {
   const workspace = resolveWorkspaceDir(workspaceDir);
   const catalog = await readWorkspaceCatalog(workspace);
   const aliases = await readWorkspaceAliases(workspace);
@@ -690,9 +705,10 @@ server.registerTool('figma_get_tree_by_name', {
     '--style-type', styleType || 'auto',
     '--workspace', workspace,
   ];
+  if (design.type !== 'file') optionalStringArg(args, '--frame', design.id);
   if (withStyle ?? true) args.push('--with-style');
   optionalStringArg(args, '--token', token);
-  const tree = await runOpenCli('tree', args, { timeoutMs: 180_000 });
+  const tree = await runCachedOpenCli('tree', args, workspace, refresh, { timeoutMs: 180_000 });
 
   return jsonResponse({
     status: 'ok',
